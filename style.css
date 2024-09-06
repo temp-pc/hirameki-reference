@@ -4,20 +4,52 @@ body {
   padding: 0;
 }
 
-#filters-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-#date-filter {
-  padding: 10px;
+#toggle-filters {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  padding: 10px; /* パディングを少し広げてボタンを大きく見せる */
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+  z-index: 1000; /* 常に最前面に表示 */
+  height: 40px; /* ボタンの高さを倍に */
+  width: 40px; /* ボタンの幅を倍に */
   display: flex;
   align-items: center;
+  justify-content: center;
+  color: gray;
+  box-sizing: border-box; /* ボタン全体のサイズを正しく計算するため */
 }
-.numInputWrapper{
-  display: none;
+#toggle-filters i {
+  font-size: 36px; /* アイコンのサイズを大きくする */
+}
+
+#filters-container {
+  display: none; 
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  width: 200px; /* 横幅を小さめに調整 */
+  padding: 10px;
+  background-color: #f9f9f9; /* 背景色で区切り感を出す */
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#date-input-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.date-filter-row {
+  display: flex;
+  align-items: center;
 }
 
 .flatpickr-input {
@@ -30,7 +62,8 @@ body {
   font-size: 16px;
   text-align: center;
 }
-button.clear-date{
+
+button.clear-date {
   font-size: 24px;
   background-color: transparent;
   color: red;
@@ -38,29 +71,35 @@ button.clear-date{
   margin-right: 2px;
   padding: 0px;
   cursor: pointer;
+  line-height: 1; /* ボタンの高さを調整 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-label{
-  font-size: 14px;
-  color: #333;
+
+.vertical-tilde {
+  font-size: 20px;
+  margin: 0 5px;
+  display: flex;
+  align-items: center; /* 縦中央揃え */
 }
 
 
 #user-filter {
   padding: 10px;
   display: flex;
+  flex-direction: column;
   gap: 10px;
   box-sizing: border-box;
   overflow: hidden;
   text-align: center;
 }
-
 #user-select {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 14px;
 }
-
 #selected-users {
   display: flex;
   gap: 10px;
@@ -94,12 +133,8 @@ label{
 }
 
 
-.user-row {
-  min-width: 300px; /* 最小サイズを設定 */
-}
 
-
-#all-tweets-container{
+#all-team-info-container{
   display: flex;
   flex-direction: row;
   gap: 10px;
@@ -109,10 +144,30 @@ label{
   display: flex;
   flex-direction: column; 
   flex: 1; /* 各カラムの幅 */
-  gap: 10px;
+  margin: 10px;
+  padding: 10px;
+  min-width: 300px; 
   overflow: hidden; /* カラム内で要素が収まるように */
+  border: solid 1px #657786;
+  white-space: pre-wrap;
 }
 
+.catch-phrase, .user-title{
+  text-align: center;
+}
+.cover-image {
+  max-width: 100%; /* 画像の幅を親要素に合わせる */
+  height: auto; /* 高さを自動で調整 */
+  display: block; /* 画像が意図した通りに表示されるようにする */
+  margin: 10px 0; /* 画像の上下に少し余白を追加 */
+}
+
+.show-tweets-button{
+  color: white;
+  background-color: #1d9bf0;
+  border: solid 1px #1d9bf0;
+  border-radius: 10px;
+}
 .tweet-container{
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -134,6 +189,7 @@ label{
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 14px;
 }
 .icon {
   border-radius: 50%;
@@ -141,7 +197,9 @@ label{
   height: 40px;
   margin-right: 8px;
 }
-
+.twitter-user-info{
+  font-size: 12px;
+}
 .tweet-content {
   white-space: pre-wrap; /* 改行を反映させる */
   line-height: 1.4;

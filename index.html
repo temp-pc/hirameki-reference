@@ -7,31 +7,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Twitter Summary</title>
   <link rel="stylesheet" href="style.css">
-    <!-- Flatpickr -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>
+  <!-- Flatpickr -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>
+  
+  <!-- Google Material Iconsの読み込み -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
 </head>
 
 <body>
+  <button id="toggle-filters">
+    <i class="material-icons">filter_alt</i>
+  </button>
 
-  <div id="user-filter">[ user filter ] 
-    <select id="user-select">
-      <option value="">Select a user</option>
-    </select>
-    <div id="selected-users"></div>
+  <div id="filters-container">
+    <div id="date-filter">
+      <label>【 date filter 】</label>
+      <div id="date-input-container">
+        <div class="date-filter-row">
+          <input type="text" id="startDate" class="date-text-input" placeholder="開始日">
+          <button id="clearStartDate" class="clear-date">×</button>
+        </div>
+        <div class="vertical-tilde">~</div>
+        <div class="date-filter-row">
+          <input type="text" id="endDate" class="date-text-input" placeholder="終了日">
+          <button id="clearEndDate" class="clear-date">×</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="user-filter">
+      <label>【 user filter 】</label>
+      <select id="user-select">
+      </select>
+      <div id="selected-users"></div>
+    </div>
   </div>
 
-  <div id="date-filter">[ date filter ] 
-    <input type="text" id="startDate" class="date-text-input" placeholder="開始日">
-    <button id="clearStartDate" class="clear-date">×</button>
-    <div>〜</div>
-    <input type="text" id="endDate" class="date-text-input" placeholder="終了日">
-    <button id="clearEndDate" class="clear-date">×</button>
-  </div>
 
-  <div id="all-tweets-container"></div>
+  <div id="all-team-info-container"></div>
   <script src="script.js"></script>
 
 </body>
