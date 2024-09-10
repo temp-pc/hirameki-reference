@@ -20,15 +20,15 @@ fetch('data.json')
     const initialAccounts = jsonData.map(oneUserData => oneUserData.userId);
     selectedUserIdList = initialAccounts;
     setupUserSelector(jsonData);
-    createTweetDatas(jsonData);
+    updateSelectedUsersContainer();
+    createTeamInfo(jsonData);
   })
   .catch(error => {
     console.error('Error loading data:', error);
   });
 
-updateSelectedUsersContainer()
 function updateSelectedUsersContainer() {
-  // ここで中身がちゃんと表示されるか確認する
+
   selectedUsersContainer.innerHTML = '';
 
   selectedUserIdList.forEach(userId => {
@@ -44,7 +44,7 @@ function updateSelectedUsersContainer() {
     removeButton.onclick = () => {
       selectedUserIdList = selectedUserIdList.filter(id => id !== userId);
       updateSelectedUsersContainer();
-      createTweetDatas()
+      createTeamInfo()
     };
 
     userBadge.appendChild(removeButton);
@@ -78,7 +78,7 @@ function setupUserSelector() {
     if (userId && !selectedUserIdList.includes(userId)) {
       selectedUserIdList.push(userId);
       updateSelectedUsersContainer(); // 選択中のユーザーリストを更新
-      createTweetDatas();
+      createTeamInfo();
     }
 
     userSelect.selectedIndex = 0;
@@ -96,26 +96,39 @@ document.getElementById('toggle-filters').addEventListener('click', function () 
   }
 });
 
+
+
+
+function updateFilteredTweetsContents() {
+  selectedUserIdList.forEach(userId => {
+    const tweetsContainer = document.querySelector(`#tweets-container-${userId}`);
+    if (tweetsContainer && tweetsContainer.style.display != 'none') {
+      createTweetElements(userId);
+    }
+  })
+}
+// Flatpickrのインスタンスを作成
 const flatpickrConfig = {
   locale: "ja",
   dateFormat: "m/d", // 「月-日」のみを使用
   altFormat: "m月d日", // 表示形式
-  onChange: createTweetDatas,
+  onChange: updateFilteredTweetsContents,
 };
-
-// Flatpickrのインスタンスを作成
 const startDatePicker = flatpickr("#startDate", flatpickrConfig);
 const endDatePicker = flatpickr("#endDate", flatpickrConfig);
+// 日付クリアボタンの処理
 document.getElementById('clearStartDate').addEventListener('click', function () {
   startDatePicker.clear();
-  createTweetDatas()
+  updateFilteredTweetsContents();
 });
 document.getElementById('clearEndDate').addEventListener('click', function () {
   endDatePicker.clear();
-  createTweetDatas()
+  updateFilteredTweetsContents();
 });
 
-function createTweetDatas() {
+function createTeamInfo() {
+  console.log("start creating team info")
+
   allTweetsContainer.innerHTML = '';
   const userFilteredData = jsonData.filter(user => selectedUserIdList.includes(user.userId));
   userFilteredData.sort((a, b) => {
@@ -127,10 +140,12 @@ function createTweetDatas() {
   });
   userFilteredData.forEach(oneUserData => {
 
+    const userId = oneUserData.userId;
+    console.log(userId)
     // ユーザーのカラムを作成
     const userRow = document.createElement('div');
     userRow.className = 'user-row';
-    userRow.id = oneUserData.userId;
+    userRow.id = `team-${userId}`;
 
     // カラムのタイトル（ユーザー名）を表示
     const teamInfoContainer = document.createElement('div');
@@ -164,88 +179,115 @@ function createTweetDatas() {
 
     userRow.appendChild(teamInfoContainer);
 
-    const showTweetsButton = document.createElement('button');
-    showTweetsButton.textContent = 'ツイート表示';
-    showTweetsButton.className = 'show-tweets-button';
+    if (oneUserData.tweets.length > 0) {
+      const tweetsContainer = document.createElement('div');
+      tweetsContainer.className = 'tweets-container';
+      tweetsContainer.id = `tweets-container-${userId}`;
+      tweetsContainer.style.display = 'none'; // デフォルトで非表示
 
-    const tweetsContainer = document.createElement('div');
-    tweetsContainer.className = 'tweets-container';
-    tweetsContainer.style.display = 'none'; // デフォルトで非表示
+      const showTweetsButton = document.createElement('button');
+      showTweetsButton.textContent = 'ツイート表示';
+      showTweetsButton.className = 'show-tweets-button';
+      showTweetsButton.id = `show-tweets-of-${userId}`;
 
-    showTweetsButton.addEventListener('click', () => {
-      if (tweetsContainer.style.display === 'none') {
-        tweetsContainer.style.display = 'block';
-        showTweetsButton.textContent = 'ツイート非表示'; // ボタンのテキストを変更
-      } else {
-        tweetsContainer.style.display = 'none';
-        showTweetsButton.textContent = 'ツイート表示';
-      }
-    });
-    userRow.appendChild(showTweetsButton);
-
-    //日付でフィルター
-    const startDate = document.getElementById('startDate').value
-    const endDate = document.getElementById('endDate').value;
-
-    // 年月日が範囲内にあるか確認する関数
-    function isDateInRange(tweetDate, startFullDate, endFullDate) {
-      if (startFullDate && endFullDate) {
-        return tweetDate >= startFullDate && tweetDate <= endFullDate;
-      } else if (startFullDate) {
-        return tweetDate >= startFullDate;
-      } else if (endFullDate) {
-        return tweetDate <= endFullDate;
-      }
-      return true; // フィルタ条件がない場合、すべてを含む
-    }
-
-    // フィルタリングの適用部分
-    let tweetsData;
-    if (startDate || endDate) {
-      const tweetYear = oneUserData.year; // ツイートの西暦
-      const startFullDate = startDate ? `${tweetYear}-${startDate}` : null; // "2023-03/15"
-      const endFullDate = endDate ? `${tweetYear}-${endDate}` : null; // "2023-06/20"
-
-      tweetsData = oneUserData.tweets.filter(tweet => {
-        const tweetDate = tweet.tweetDateTime.split(' ')[0]; // ツイートの完全な日付 (例: "2023-03-16")
-        return isDateInRange(tweetDate, startFullDate, endFullDate);
+      showTweetsButton.addEventListener('click', () => {
+        if (tweetsContainer.style.display === 'none') {
+          tweetsContainer.style.display = 'block';
+          showTweetsButton.textContent = 'ツイート非表示'; // ボタンのテキストを変更
+          if (!tweetsContainer.querySelector('div')) {
+            createTweetElements(userId);
+          }
+        } else {
+          tweetsContainer.style.display = 'none';
+          showTweetsButton.textContent = 'ツイート表示';
+        }
       });
-    } else {
-      tweetsData = oneUserData.tweets;
+      userRow.appendChild(showTweetsButton);
+      userRow.appendChild(tweetsContainer);
+
     }
+    allTweetsContainer.appendChild(userRow);
+  })
+}
+
+function createTweetElements(userId) {
+  const oneUserData = jsonData.filter(user => user.userId === userId)[0];
+
+  const userRow = document.querySelector(`#team-${userId}`);
+  console.log("user row", userRow)
+  const tweetsContainer = userRow.querySelector('.tweets-container');
+  tweetsContainer.innerHTML = ""; //初期化
+  userRow.appendChild(tweetsContainer);
+
+  //日付でフィルター
+  const startDate = document.getElementById('startDate').value
+  const endDate = document.getElementById('endDate').value;
+  console.log(startDate, endDate);
+
+  // 年月日が範囲内にあるか確認する関数
+  function isDateInRange(tweetDate, startFullDate, endFullDate) {
+    const tweetDateObj = new Date(tweetDate); // 日付文字列をDateオブジェクトに変換
+    const startFullDateObj = startFullDate ? new Date(startFullDate) : null;
+    const endFullDateObj = endFullDate ? new Date(endFullDate) : null;
+    const lastDayOfTheYear = new Date(`${startFullDateObj.getFullYear()}/12/31`);
+    if (startFullDateObj && endFullDateObj) {
+      return tweetDateObj >= startFullDateObj && tweetDateObj <= endFullDateObj;
+    } else if (startFullDateObj) {
+      return tweetDateObj >= startFullDateObj && tweetDateObj <= lastDayOfTheYear;
+    } else if (endFullDateObj) {
+      return tweetDateObj <= endFullDateObj;
+    }
+    return true; // フィルタ条件がない場合、すべてを含む
+  }
+
+  // フィルタリングの適用部分
+  let tweetsData;
+  if (startDate || endDate) {
+    const tweetYear = oneUserData.year; // ツイートの西暦
+    const startFullDate = startDate ? `${tweetYear}/${startDate}` : null; // "2023/03/15"
+    const endFullDate = endDate ? `${tweetYear}/${endDate}` : null; // "2023/06/20"
+
+    tweetsData = oneUserData.tweets.filter(tweet => {
+      const tweetDate = tweet.tweetDateTime.split(' ')[0]; // ツイートの完全な日付 (例: "2023/03/16")
+      return isDateInRange(tweetDate, startFullDate, endFullDate);
+    });
+  } else {
+    console.log("all data")
+    tweetsData = oneUserData.tweets;
+  }
 
 
-    // // 月日が範囲内にあるか確認する関数
-    // function isDateInRange(tweetMonthDay, startMonthDay, endMonthDay) {
-    //   if (startMonthDay && endMonthDay) {
-    //     return tweetMonthDay >= startMonthDay && tweetMonthDay <= endMonthDay;
-    //   } else if (startMonthDay) {
-    //     return tweetMonthDay >= startMonthDay;
-    //   } else if (endMonthDay) {
-    //     return tweetMonthDay <= endMonthDay;
-    //   }
-    //   return true; // フィルタ条件がない場合、すべてを含む
-    // }
+  // // 月日が範囲内にあるか確認する関数
+  // function isDateInRange(tweetMonthDay, startMonthDay, endMonthDay) {
+  //   if (startMonthDay && endMonthDay) {
+  //     return tweetMonthDay >= startMonthDay && tweetMonthDay <= endMonthDay;
+  //   } else if (startMonthDay) {
+  //     return tweetMonthDay >= startMonthDay;
+  //   } else if (endMonthDay) {
+  //     return tweetMonthDay <= endMonthDay;
+  //   }
+  //   return true; // フィルタ条件がない場合、すべてを含む
+  // }
 
-    // let tweetsData
-    // if (startDate || endDate) {
-    //   tweetsData = oneUserData.tweets.filter(tweet => {
-    //     const tweetDate = tweet.tweetDateTime.split(' ')[0].slice(5) // "MM/DD" を抽出
-    //     // `startDate` と `endDate` でフィルタリング
-    //     return isDateInRange(tweetDate, startDate, endDate);
-    //   });
-    // } else {
-    //   tweetsData = oneUserData.tweets;
-    // }
+  // let tweetsData
+  // if (startDate || endDate) {
+  //   tweetsData = oneUserData.tweets.filter(tweet => {
+  //     const tweetDate = tweet.tweetDateTime.split(' ')[0].slice(5) // "MM/DD" を抽出
+  //     // `startDate` と `endDate` でフィルタリング
+  //     return isDateInRange(tweetDate, startDate, endDate);
+  //   });
+  // } else {
+  //   tweetsData = oneUserData.tweets;
+  // }
 
-    tweetsData.forEach(tweet => {
-      const tweetElement = document.createElement('div');
-      tweetElement.className = 'tweet-container';
+  tweetsData.forEach(tweet => {
+    const tweetElement = document.createElement('div');
+    tweetElement.className = 'tweet-container';
 
-      // ツイートのヘッダー部分
-      const tweetHeader = document.createElement('div');
-      tweetHeader.className = 'tweet-header';
-      tweetHeader.innerHTML = `
+    // ツイートのヘッダー部分
+    const tweetHeader = document.createElement('div');
+    tweetHeader.className = 'tweet-header';
+    tweetHeader.innerHTML = `
     <div class="repost-info"></div>
     <div class="icon-and-timestamp">
       <img src="${tweet.iconImageURL}" alt="User Icon" class="icon">
@@ -253,56 +295,52 @@ function createTweetDatas() {
       <div>${tweet.tweetDateTime}</div>
     </div>
   `;
-      tweetElement.appendChild(tweetHeader);
+    tweetElement.appendChild(tweetHeader);
 
-      // ツイートの内容部分
-      const tweetContent = document.createElement('div');
-      tweetContent.className = 'tweet-content';
-      tweetContent.textContent = tweet.tweetContent;
-      tweetElement.appendChild(tweetContent);
+    // ツイートの内容部分
+    const tweetContent = document.createElement('div');
+    tweetContent.className = 'tweet-content';
+    tweetContent.textContent = tweet.tweetContent;
+    tweetElement.appendChild(tweetContent);
 
-      // 画像がある場合
-      if (tweet.attachedImageURLs && tweet.attachedImageURLs.length > 0) {
-        const attachedImages = document.createElement('div');
-        attachedImages.className = 'attached-images';
-        tweet.attachedImageURLs.forEach(url => {
-          const img = document.createElement('img');
-          img.src = url;
-          img.className = 'tweet-image';
-          attachedImages.appendChild(img);
-        });
-        tweetElement.appendChild(attachedImages);
-      }
+    // 画像がある場合
+    if (tweet.attachedImageURLs && tweet.attachedImageURLs.length > 0) {
+      const attachedImages = document.createElement('div');
+      attachedImages.className = 'attached-images';
+      tweet.attachedImageURLs.forEach(url => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'tweet-image';
+        attachedImages.appendChild(img);
+      });
+      tweetElement.appendChild(attachedImages);
+    }
 
-      // ツイートのフッター部分
-      const tweetFooter = document.createElement('div');
-      tweetFooter.className = 'tweet-footer';
-      tweetFooter.innerHTML = `
+    // ツイートのフッター部分
+    const tweetFooter = document.createElement('div');
+    tweetFooter.className = 'tweet-footer';
+    tweetFooter.innerHTML = `
       <span>${replySVG} ${tweet.replyCount}</span>
       <span>${repostSVG} ${tweet.repostCount}</span>
       <span>${likeSVG} ${tweet.likeCount}</span>
       <span>${viewSVG} ${tweet.viewCount}</span>
   `;
-      tweetElement.appendChild(tweetFooter);
+    tweetElement.appendChild(tweetFooter);
 
-      // Twitterのページを表示するリンク
-      const tweetSourceLink = document.createElement('div');
-      tweetSourceLink.className = 'tweet-source-link';
-      tweetSourceLink.innerHTML = `<a href="${baseUrl}${tweet.url}" target="_blank">Open in X</a>`
-      tweetElement.appendChild(tweetSourceLink);
+    // Twitterのページを表示するリンク
+    const tweetSourceLink = document.createElement('div');
+    tweetSourceLink.className = 'tweet-source-link';
+    tweetSourceLink.innerHTML = `<a href="${baseUrl}${tweet.url}" target="_blank">Open in X</a>`
+    tweetElement.appendChild(tweetSourceLink);
 
-      if (tweet.repostFlag) {
-        const repostInfo = tweetElement.querySelector('.repost-info')
-        repostInfo.innerHTML = `${repostSVG} ${oneUserData.userId} reposted`;
-      }
+    if (tweet.repostFlag) {
+      const repostInfo = tweetElement.querySelector('.repost-info')
+      repostInfo.innerHTML = `${repostSVG} ${oneUserData.userId} reposted`;
+    }
 
-      // ツイート要素をコンテナに追加
-      tweetsContainer.appendChild(tweetElement);
-    });
-
-    userRow.appendChild(tweetsContainer);
-    allTweetsContainer.appendChild(userRow);
-  })
+    // ツイート要素をコンテナに追加
+    tweetsContainer.appendChild(tweetElement);
+  });
 
 }
 
