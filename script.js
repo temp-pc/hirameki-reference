@@ -187,19 +187,21 @@ function createTeamInfo() {
 
       const showTweetsButton = document.createElement('button');
       showTweetsButton.textContent = 'ツイート表示';
-      showTweetsButton.className = 'show-tweets-button';
+      showTweetsButton.className = 'show-tweets';
       showTweetsButton.id = `show-tweets-of-${userId}`;
 
       showTweetsButton.addEventListener('click', () => {
         if (tweetsContainer.style.display === 'none') {
           tweetsContainer.style.display = 'block';
           showTweetsButton.textContent = 'ツイート非表示'; // ボタンのテキストを変更
+          showTweetsButton.className = 'hide-tweets';
           if (!tweetsContainer.querySelector('div')) {
             createTweetElements(userId);
           }
         } else {
           tweetsContainer.style.display = 'none';
           showTweetsButton.textContent = 'ツイート表示';
+          showTweetsButton.className = 'show-tweets';
         }
       });
       userRow.appendChild(showTweetsButton);
@@ -287,14 +289,17 @@ function createTweetElements(userId) {
     // ツイートのヘッダー部分
     const tweetHeader = document.createElement('div');
     tweetHeader.className = 'tweet-header';
-    tweetHeader.innerHTML = `
-    <div class="repost-info"></div>
-    <div class="icon-and-timestamp">
-      <img src="${tweet.iconImageURL}" alt="User Icon" class="icon">
-      <div class="twitter-user-info">${oneUserData.userName}@${oneUserData.userId}</div>
-      <div>${tweet.tweetDateTime}</div>
-    </div>
-  `;
+    const repostInfoDiv = document.createElement('div');
+    repostInfoDiv.className = "repost-info";
+    tweetHeader.appendChild(repostInfoDiv);
+    const iconAndTimestampDiv = document.createElement('div');
+    iconAndTimestampDiv.className = "icon-and-timestamp";
+    iconAndTimestampDiv.innerHTML = `<img src="${tweet.iconImageURL}" alt="User Icon" class="icon">`
+    if(!tweet.repostFlag){
+      iconAndTimestampDiv.innerHTML += `<div class="twitter-user-info">${oneUserData.userName}@${oneUserData.userId}</div>`
+    }
+    iconAndTimestampDiv.innerHTML += `<div>${tweet.tweetDateTime}</div>`
+    tweetHeader.appendChild(iconAndTimestampDiv);
     tweetElement.appendChild(tweetHeader);
 
     // ツイートの内容部分
