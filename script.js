@@ -51,7 +51,8 @@ function updateSelectedUsersContainer() {
     removeButton.onclick = () => {
       selectedUserIdList = selectedUserIdList.filter(id => id !== userId);
       updateSelectedUsersContainer();
-      createTeamInfo()
+      setupUserSelector();
+      createTeamInfo();
     };
 
     userBadge.appendChild(removeButton);
