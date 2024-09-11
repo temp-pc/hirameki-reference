@@ -11,6 +11,13 @@ const userSelect = document.querySelector('#user-select');
 const selectedUsersContainer = document.querySelector('#selected-users');
 let selectedUserIdList
 
+document.addEventListener('DOMContentLoaded', () => {
+  const hideRepostsCheckbox = document.getElementById('hideReposts');
+  hideRepostsCheckbox.checked = false;
+  hideRepostsCheckbox.addEventListener("click", e => {
+    updateFilteredTweetsContents()
+  })
+});
 
 
 fetch('data.json')
@@ -282,7 +289,12 @@ function createTweetElements(userId) {
   //   tweetsData = oneUserData.tweets;
   // }
 
+  displayRepostsFlag = document.querySelector('#hideReposts').checked
+
   tweetsData.forEach(tweet => {
+    if (!(displayRepostsFlag && tweet.repostFlag)){
+
+    
     const tweetElement = document.createElement('div');
     tweetElement.className = 'tweet-container';
 
@@ -345,6 +357,7 @@ function createTweetElements(userId) {
 
     // ツイート要素をコンテナに追加
     tweetsContainer.appendChild(tweetElement);
+    }
   });
 
 }
