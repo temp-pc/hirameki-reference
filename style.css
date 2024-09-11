@@ -145,7 +145,6 @@ button.clear-date {
   flex-direction: column; 
   flex: 1; /* 各カラムの幅 */
   margin: 10px;
-  padding: 10px;
   min-width: 300px; 
   overflow: hidden; /* カラム内で要素が収まるように */
   border: solid 1px #657786;
@@ -157,16 +156,30 @@ button.clear-date {
 }
 .cover-image {
   max-width: 100%; /* 画像の幅を親要素に合わせる */
+  margin: 10px;
   height: auto; /* 高さを自動で調整 */
   display: block; /* 画像が意図した通りに表示されるようにする */
   margin: 10px 0; /* 画像の上下に少し余白を追加 */
 }
 
-.show-tweets-button{
+.team-info{
+  padding: 10px;
+  background-color: #e0ffff;
+}
+
+button.show-tweets{
   color: white;
   background-color: #1d9bf0;
   border: solid 1px #1d9bf0;
   border-radius: 10px;
+  margin: 10px;
+}
+button.hide-tweets {
+  color: white;
+  background-color: gray;
+  border: solid 1px #1d9bf0;
+  border-radius: 10px;
+  margin: 10px;
 }
 .tweet-container{
   border: 1px solid #ddd;
